@@ -3,15 +3,25 @@
 import { useState } from 'react';
 import Link from 'next/link';
 
+type FormData = {
+  whiskyName: string;
+  taste: string;
+  style: string[];
+  price: string;
+  memo: string;
+  rating: string;
+};
+
 export default function RegisterPage() {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<FormData>({
     whiskyName: '',
     taste: '',
-    style: '',
+    style: [],
     price: '',
     memo: '',
     rating: '3',
   });
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -31,7 +41,7 @@ export default function RegisterPage() {
         setForm({
           whiskyName: '',
           taste: '',
-          style: '',
+          style: [],
           price: '',
           memo: '',
           rating: '3',
@@ -47,45 +57,71 @@ export default function RegisterPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white flex items-center justify-center px-4">
-  <form className="bg-gray-800 bg-opacity-80 p-8 rounded shadow-md w-full max-w-md">
-    <h2 className="text-2xl font-bold mb-6 text-yellow-400 text-center">ウイスキー登録フォーム</h2>
-    <label className="block mb-2 font-semibold text-white">ウイスキー名</label>
-    <input className="w-full p-2 mb-4 rounded bg-gray-700 text-white border border-gray-600" />
+      <form className="bg-gray-800 bg-opacity-80 p-8 rounded shadow-md w-full max-w-md">
+        <h2 className="text-2xl font-bold mb-6 text-yellow-400 text-center">ウイスキー登録</h2>
+        <label className="block mb-2 font-semibold">ウイスキー名</label>
+        <input className="w-full p-2 mb-4 border rounded" />
 
         <label className="block mb-2 font-semibold">テイスト</label>
         <input type="text" name="taste" value={form.taste} onChange={handleChange} required className="w-full p-2 mb-4 border rounded" />
 
-        <label className="block mb-2 font-semibold">飲み方</label>
-        <select name="style" value={form.style} onChange={handleChange} required className="w-full p-2 mb-4 border rounded">
-          <option value="">選択してください</option>
-          <option value="ストレート">ストレート</option>
-          <option value="ロック">ロック</option>
-          <option value="水割り">水割り</option>
-          <option value="ハイボール">ハイボール</option>
-        </select>
+
+
+        <label className="block mb-2 font-semibold">飲み方（複数選択可）</label>
+        <div className="mb-4 space-y-2">
+          {["ストレート", "ロック", "水割り", "ハイボール"].map((style) => (
+            <label key={style} className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                value={style}
+                checked={form.style.includes(style)}
+                onChange={() => {
+                  const selected = form.style.includes(style)
+                    ? form.style.filter((s) => s !== style)
+                    : [...form.style, style];
+                  setForm({ ...form, style: selected });
+                }}
+                className="accent-yellow-500"
+              />
+              <span>{style}</span>
+            </label>
+          ))}
+        </div>
+
+
+
 
         <label className="block mb-2 font-semibold">値段（円）</label>
-        <input type="number" name="price" value={form.price} onChange={handleChange} required className="w-full p-2 mb-4 border rounded" />
+        <input name="price" value={form.price} onChange={handleChange} required className="w-full p-2 mb-4 border rounded" />
 
         <label className="block mb-2 font-semibold">メモ</label>
         <textarea name="memo" value={form.memo} onChange={handleChange} rows={3} className="w-full p-2 mb-4 border rounded" />
-
-        <label className="block mb-2 font-semibold">評価（1〜5）</label>
-        <select name="rating" value={form.rating} onChange={handleChange} required className="w-full p-2 mb-6 border rounded">
+        
+        <label className="block mb-2 font-semibold">評価</label>
+        <div className="mb-6">
           {[1, 2, 3, 4, 5].map((num) => (
-            <option key={num} value={num}>{num}</option>
+            <button
+              key={num}
+              type="button"
+              onClick={() => setForm({ ...form, rating: num.toString() })}
+              className={`text-2xl mr-1 ${num <= parseInt(form.rating) ? 'text-yellow-400' : 'text-gray-500'
+                } hover:scale-110 transition-transform`}
+            >
+              ★
+            </button>
           ))}
-        </select>
+        </div>
+
 
         <button className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded">
-      登録する
-    </button>
+          登録する
+        </button>
 
-    <div className="mt-10 text-center">
-  <Link href="/" className="inline-block bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-6 rounded shadow transition">
-    TOPに戻る
-  </Link>
-</div>
+        <div className="mt-10 text-center">
+          <Link href="/" className="inline-block bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-6 rounded shadow transition">
+            TOPに戻る
+          </Link>
+        </div>
       </form>
     </main>
   );
