@@ -10,6 +10,7 @@ type Rating = {
   userId: number;
   whiskyId: number;
   rating: number;
+  comment: string;
   ratingAt: string;
   isDeleted: boolean;
 };
@@ -21,24 +22,21 @@ type Whisky = {
   taste: string;
   drinkingStyle: string;
   price: number;
-  memo: string;
   isDeleted: boolean;
 };
 
 export default function EditWhiskyPage() {
   const router = useRouter();
-
   const searchParams = useSearchParams();
   const [id, setId] = useState<string | null>(null);
   const [whisky, setWhisky] = useState<Whisky | null>(null);
   const [rating, setRating] = useState<Rating | null>(null);
   const [loading, setLoading] = useState(true);
+  const drinkingOptions = ['ストレート', 'ロック', 'ハイボール', '水割り'];
 
   useEffect(() => {
     const paramId = searchParams.get('id');
-    if (paramId) {
-      setId(paramId);
-    }
+    if (paramId) setId(paramId);
   }, [searchParams]);
 
   useEffect(() => {
@@ -62,24 +60,16 @@ export default function EditWhiskyPage() {
     fetchWhisky();
   }, [id]);
 
-  const handleDelete = async (): Promise<void> => {
+  const handleStyleChange = (style: string) => {
     if (!whisky) return;
-
-    const confirmDelete = window.confirm('本当に削除しますか？');
-    if (!confirmDelete) return;
-
-    try {
-      await fetch(`http://localhost:8080/deleteWhisky/${whisky.userId}/${whisky.id}`, {
-        method: 'PUT',
-      });
-
-      alert('削除が完了しました');
-    } catch (error) {
-      console.error('削除失敗:', error);
-    }
+    const current = whisky.drinkingStyle?.split(',') ?? [];
+    const updated = current.includes(style)
+      ? current.filter((s) => s !== style)
+      : [...current, style];
+    setWhisky({ ...whisky, drinkingStyle: updated.join(',') });
   };
 
-  const handleUpdate = async (): Promise<void> => {
+  const handleUpdate = async () => {
     if (!whisky || !rating) return;
 
     try {
@@ -96,6 +86,26 @@ export default function EditWhiskyPage() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!whisky || !rating) return;
+
+    const confirmDelete = window.confirm('本当に削除しますか？');
+    if (!confirmDelete) return;
+
+    try {
+      await fetch(`http://localhost:8080/deleteWhisky/${whisky.userId}/${whisky.id}`, {
+        method: 'PUT',
+      });
+      await fetch(`http://localhost:8080/deleteRating/${rating.userId}/${rating.id}`, {
+        method: 'PUT',
+      });
+
+      alert('削除が完了しました');
+      router.push('/');
+    } catch (error) {
+      console.error('削除失敗:', error);
+    }
+  };
 
   if (loading) {
     return <p className="text-center text-gray-400 mt-10">読み込み中...</p>;
@@ -113,18 +123,21 @@ export default function EditWhiskyPage() {
     );
   }
 
+  const selectedStyles = whisky.drinkingStyle?.split(',') ?? [];
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white px-4 py-8">
       <h1 className="text-3xl font-bold text-yellow-400 text-center mb-6">ウイスキー情報更新</h1>
 
       <form className="max-w-md mx-auto bg-gray-800 bg-opacity-80 p-6 rounded shadow space-y-6">
         <div>
-          <label className="block mb-1 font-semibold">ウイスキー名</label>
+          <label className="block mb-1 font-semibold">ウイスキー名（必須）</label>
           <input
             type="text"
             value={whisky.name}
             onChange={(e) => setWhisky({ ...whisky, name: e.target.value })}
             className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600"
+            required
           />
         </div>
 
@@ -139,13 +152,20 @@ export default function EditWhiskyPage() {
         </div>
 
         <div>
-          <label className="block mb-1 font-semibold">飲み方</label>
-          <input
-            type="text"
-            value={whisky.drinkingStyle}
-            onChange={(e) => setWhisky({ ...whisky, drinkingStyle: e.target.value })}
-            className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600"
-          />
+          <label className="block mb-1 font-semibold">飲み方（複数選択可）</label>
+          <div className="flex flex-wrap gap-2">
+            {drinkingOptions.map((style) => (
+              <label key={style} className="flex items-center gap-1">
+                <input
+                  type="checkbox"
+                  checked={selectedStyles.includes(style)}
+                  onChange={() => handleStyleChange(style)}
+                  className="accent-yellow-500"
+                />
+                {style}
+              </label>
+            ))}
+          </div>
         </div>
 
         <div>
@@ -154,15 +174,16 @@ export default function EditWhiskyPage() {
             type="number"
             value={whisky.price}
             onChange={(e) => setWhisky({ ...whisky, price: Number(e.target.value) })}
-            className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600"
+            className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 appearance-none"
           />
         </div>
 
         <div>
-          <label className="block mb-1 font-semibold">メモ</label>
+          <label className="block mb-1 font-semibold">コメント</label>
           <textarea
-            value={whisky.memo}
-            onChange={(e) => setWhisky({ ...whisky, memo: e.target.value })}
+            value={rating.comment ?? ''}
+            onChange={(e) => setRating({ ...rating, comment: e.target.value })}
+            rows={3}
             className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600"
           />
         </div>
@@ -190,7 +211,6 @@ export default function EditWhiskyPage() {
           className="mb-5 w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded"
         >
           更新する
-
         </button>
 
         <button
@@ -201,8 +221,12 @@ export default function EditWhiskyPage() {
           削除する
         </button>
 
-        <div className="text-center mt-4">
-          <Link href="/" className="text-yellow-400 hover:underline">TOPに戻る</Link>
+        <div className="flex justify-end mt-10">
+          <Link href="/">
+            <button className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded shadow">
+              TOPへ戻る
+            </button>
+          </Link>
         </div>
       </form>
     </main>

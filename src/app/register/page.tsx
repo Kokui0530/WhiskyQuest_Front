@@ -3,123 +3,166 @@
 import { useState } from 'react';
 import Link from 'next/link';
 
-type FormData = {
-  whiskyName: string;
-  taste: string;
-  style: string[];
-  price: string;
-  memo: string;
-  rating: string;
-};
+export default function RegisterWhiskyPage() {
+  const [name, setName] = useState('');
+  const [taste, setTaste] = useState('');
+  const [styles, setStyles] = useState<string[]>([]);
+  const [price, setPrice] = useState<number | ''>('');
+  const [memo, setMemo] = useState('');
+  const [rating, setRating] = useState<number>(1); // 初期値を1に設定
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-export default function RegisterPage() {
-  const [form, setForm] = useState<FormData>({
-    whiskyName: '',
-    taste: '',
-    style: [],
-    price: '',
-    memo: '',
-    rating: '3',
-  });
+  const drinkingOptions = ['ストレート', 'ロック', 'ハイボール', '水割り'];
 
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleStyleChange = (style: string) => {
+    setStyles((prev) =>
+      prev.includes(style) ? prev.filter((s) => s !== style) : [...prev, style]
+    );
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+    setError('');
+    setSuccess('');
+
+    if (!name.trim()) {
+      setError('ウイスキー名は必須です');
+      return;
+    }
+
+    const whiskyInfo = {
+      whisky: {
+        name,
+        taste,
+        drinkingStyle: styles.join(','),
+        price: price === '' ? null : price,
+        memo,
+      },
+      rating: {
+        rating,
+      },
+    };
+
     try {
-      const res = await fetch('http://localhost:8080/registerWhisky', {
+      const res = await fetch('http://localhost:8080/whisky', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(whiskyInfo),
       });
 
-      if (res.ok) {
-        alert('ウイスキーを登録しました！');
-        setForm({
-          whiskyName: '',
-          taste: '',
-          style: [],
-          price: '',
-          memo: '',
-          rating: '3',
-        });
-      } else {
-        alert('登録に失敗しました');
+      if (res.status === 409) {
+        setError('同じウイスキーの登録があります。\nマイページの編集から編集をしてください。');
+        return;
       }
-    } catch (error) {
-      console.error('登録エラー:', error);
-      alert('通信エラーが発生しました');
+
+      if (!res.ok) throw new Error('登録失敗');
+
+      setSuccess('ウイスキーを登録しました！');
+      setName('');
+      setTaste('');
+      setStyles([]);
+      setPrice('');
+      setMemo('');
+      setRating(0);
+    } catch (err) {
+      setError('登録中にエラーが発生しました');
     }
   };
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white flex items-center justify-center px-4">
-      <form className="bg-gray-800 bg-opacity-80 p-8 rounded shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-yellow-400 text-center">ウイスキー登録</h2>
-        <label className="block mb-2 font-semibold">ウイスキー名</label>
-        <input className="w-full p-2 mb-4 border rounded" />
+      <form className="bg-gray-800 bg-opacity-80 p-8 rounded shadow-md w-full max-w-md space-y-6">
+        <h1 className="text-3xl font-bold text-yellow-400 text-center">ウイスキー登録</h1>
 
-        <label className="block mb-2 font-semibold">テイスト</label>
-        <input type="text" name="taste" value={form.taste} onChange={handleChange} required className="w-full p-2 mb-4 border rounded" />
-
-
-
-        <label className="block mb-2 font-semibold">飲み方（複数選択可）</label>
-        <div className="mb-4 space-y-2">
-          {["ストレート", "ロック", "水割り", "ハイボール"].map((style) => (
-            <label key={style} className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                value={style}
-                checked={form.style.includes(style)}
-                onChange={() => {
-                  const selected = form.style.includes(style)
-                    ? form.style.filter((s) => s !== style)
-                    : [...form.style, style];
-                  setForm({ ...form, style: selected });
-                }}
-                className="accent-yellow-500"
-              />
-              <span>{style}</span>
-            </label>
-          ))}
+        <div>
+          <label className="block mb-1 font-semibold">ウイスキー名（必須）</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600"
+            required
+          />
         </div>
 
-
-
-
-        <label className="block mb-2 font-semibold">値段（円）</label>
-        <input name="price" value={form.price} onChange={handleChange} required className="w-full p-2 mb-4 border rounded" />
-
-        <label className="block mb-2 font-semibold">メモ</label>
-        <textarea name="memo" value={form.memo} onChange={handleChange} rows={3} className="w-full p-2 mb-4 border rounded" />
-        
-        <label className="block mb-2 font-semibold">評価</label>
-        <div className="mb-6">
-          {[1, 2, 3, 4, 5].map((num) => (
-            <button
-              key={num}
-              type="button"
-              onClick={() => setForm({ ...form, rating: num.toString() })}
-              className={`text-2xl mr-1 ${num <= parseInt(form.rating) ? 'text-yellow-400' : 'text-gray-500'
-                } hover:scale-110 transition-transform`}
-            >
-              ★
-            </button>
-          ))}
+        <div>
+          <label className="block mb-1 font-semibold">テイスト</label>
+          <input
+            type="text"
+            value={taste}
+            onChange={(e) => setTaste(e.target.value)}
+            className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600"
+          />
         </div>
 
+        <div>
+          <label className="block mb-1 font-semibold">飲み方（複数選択可）</label>
+          <div className="flex flex-wrap gap-2">
+            {drinkingOptions.map((style) => (
+              <label key={style} className="flex items-center gap-1">
+                <input
+                  type="checkbox"
+                  checked={styles.includes(style)}
+                  onChange={() => handleStyleChange(style)}
+                  className="accent-yellow-500"
+                />
+                <span>{style}</span>
+              </label>
+            ))}
+          </div>
+        </div>
 
-        <button className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded">
+        <div>
+          <label className="block mb-1 font-semibold">値段</label>
+          <input
+            type="number"
+            value={price}
+            onChange={(e) => setPrice(Number(e.target.value))}
+            className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 appearance-none"
+          />
+        </div>
+
+        <div>
+          <label className="block mb-1 font-semibold">コメント</label>
+          <textarea
+            value={memo}
+            onChange={(e) => setMemo(e.target.value)}
+            className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600"
+            rows={3}
+          />
+        </div>
+
+        <div>
+          <label className="block mb-1 font-semibold">評価（1〜5）</label>
+          <div className="flex gap-2">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                type="button"
+                onClick={() => setRating(star)}
+                className={`text-2xl ${rating >= star ? 'text-yellow-400' : 'text-gray-500'
+                  } hover:scale-110 transition-transform`}
+              >
+                ★
+              </button>
+
+            ))}
+          </div>
+        </div>
+        {error && <p className="text-red-500 text-center whitespace-pre-line">{error}</p>}
+        {success && <p className="text-green-400 text-center">{success}</p>}
+        <button
+          type="button"
+          onClick={handleSubmit}
+          className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded"
+        >
           登録する
         </button>
-
-        <div className="mt-10 text-center">
-          <Link href="/" className="inline-block bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-6 rounded shadow transition">
-            TOPに戻る
+        <div className="flex justify-end mt-6">
+          <Link href="/">
+            <button className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded">
+              TOPへ戻る
+            </button>
           </Link>
         </div>
       </form>
