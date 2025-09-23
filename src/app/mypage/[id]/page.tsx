@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
+import { useParams } from 'next/navigation';
+
 
 type Rating = {
   id: number;
@@ -40,10 +42,14 @@ type UserData = {
 
 export default function MyPage() {
   const [data, setData] = useState<UserData | null>(null);
+  const { id } = useParams();
+
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await fetch('http://localhost:8080/user/3');
+      if (!id) return; // ← 念のためチェック
+
+      const res = await fetch(`http://localhost:8080/user/${id}`);
       const json: UserData = await res.json();
 
       const enrichedWhiskyList: Whisky[] = json.whiskyList.map((whisky) => {
@@ -59,7 +65,8 @@ export default function MyPage() {
     };
 
     fetchData();
-  }, []);
+  }, [id]); // ← idが変わったら再取得！
+
 
   if (!data) {
     return <p className="text-center text-gray-400 mt-10">読み込み中...</p>;
@@ -71,6 +78,7 @@ export default function MyPage() {
   };
 
   return (
+
     <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white px-4 py-8">
       <div className="max-w-3xl mx-auto">
         {/* ✅ ヘッダー */}
@@ -78,8 +86,9 @@ export default function MyPage() {
           {data.users.userName}さんのマイページ
         </h1>
 
+
         <div className="flex justify-end mb-8">
-          <Link href="/mypage/edit-user">
+          <Link href={`/mypage/edit-user/${data.users.id}`}>
             <button className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-6 rounded shadow">
               ユーザー情報を変更する
             </button>
