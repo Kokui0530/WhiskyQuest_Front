@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 
+
 type Rating = {
   id: number;
   userId: number;
@@ -21,7 +22,7 @@ type Whisky = {
   name: string;
   taste: string;
   drinkingStyle: string;
-  price: number;
+  price: number | null;
   isDeleted: boolean;
 };
 
@@ -73,18 +74,24 @@ export default function EditWhiskyPage() {
     if (!whisky || !rating) return;
 
     try {
-      await fetch(`http://localhost:8080/updateWhiskyInfo/${whisky.id}/${rating.id}`, {
+      const res = await fetch(`http://localhost:8080/updateWhiskyInfo/${whisky.id}/${rating.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ whisky, rating }),
       });
 
-      alert('ウイスキー情報を更新しました！');
-      router.push('/mypage');
+      if (res.ok) {
+        alert('ウイスキー情報を更新しました！');
+        router.push(`/mypage/${whisky.userId}`);
+      } else {
+        alert('更新に失敗しました');
+      }
     } catch (error) {
       console.error('更新失敗:', error);
+      alert('エラーが発生しました');
     }
   };
+
 
   const handleDelete = async () => {
     if (!whisky || !rating) return;
@@ -93,17 +100,23 @@ export default function EditWhiskyPage() {
     if (!confirmDelete) return;
 
     try {
-      await fetch(`http://localhost:8080/deleteWhisky/${whisky.userId}/${whisky.id}`, {
-        method: 'PUT',
-      });
-      await fetch(`http://localhost:8080/deleteRating/${rating.userId}/${rating.id}`, {
+      const resWhisky = await fetch(`http://localhost:8080/deleteWhisky/${whisky.userId}/${whisky.id}`, {
         method: 'PUT',
       });
 
-      alert('削除が完了しました');
-      router.push('/');
+      const resRating = await fetch(`http://localhost:8080/deleteRating/${rating.userId}/${rating.id}`, {
+        method: 'PUT',
+      });
+
+      if (resWhisky.ok && resRating.ok) {
+        alert('削除が完了しました');
+        router.push('/');
+      } else {
+        alert('削除に失敗しました');
+      }
     } catch (error) {
       console.error('削除失敗:', error);
+      alert('エラーが発生しました');
     }
   };
 
@@ -172,10 +185,17 @@ export default function EditWhiskyPage() {
           <label className="block mb-1 font-semibold">価格</label>
           <input
             type="number"
-            value={whisky.price}
-            onChange={(e) => setWhisky({ ...whisky, price: Number(e.target.value) })}
+            step="1" // ← 小数を防ぐ
+            value={whisky.price ?? ''}
+            onChange={(e) =>
+              setWhisky({
+                ...whisky,
+                price: e.target.value === '' ? null : parseInt(e.target.value, 10),
+              })
+            }
             className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 appearance-none"
           />
+
         </div>
 
         <div>

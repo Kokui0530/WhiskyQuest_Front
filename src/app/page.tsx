@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+
 
 type WhiskyRanking = {
   whiskyId: number;
@@ -10,10 +13,19 @@ type WhiskyRanking = {
   ratingCount: number;
 };
 
-export default function Home() {
+export default function RegisterWhiskyPage() {
+  const { userId } = useParams();
   const [rankingList, setRankingList] = useState<WhiskyRanking[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const [selectedUserId, setSelectedUserId] = useState<number | ''>('');
 
+  useEffect(() => {
+    const storedId = localStorage.getItem('selectedUserId');
+    if (storedId) {
+      setSelectedUserId(Number(storedId));
+    }
+  }, []);
   useEffect(() => {
     const fetchRanking = async () => {
       try {
@@ -42,19 +54,72 @@ export default function Home() {
         あなたのウイスキー体験を記録・共有しましょう。
       </p>
 
+      <div className="flex items-center gap-4 mb-2">
+        <label className="text-white font-semibold mb-1">ユーザーIDを入力:</label>
+        <div className="flex items-center gap-4 mb-2">
+          <input
+            type="number"
+            value={selectedUserId}
+            onChange={(e) => {
+              const value = e.target.value;
+              setSelectedUserId(value === '' ? '' : Number(value));
+            }}
+            className="bg-gray-700 text-white p-2 rounded w-24"
+            min={1}
+          />
+          <button
+            onClick={() => {
+              if (selectedUserId !== '') {
+                localStorage.setItem('selectedUserId', selectedUserId.toString());
+              }
+            }}
+            className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded"
+          >
+            ユーザー切り替え
+          </button>
+        </div>
+      </div>
+
+      {/* ← インデントして改行表示 */}
+      {selectedUserId === '' && (
+        <p className="text-sm text-red-400 ml-6 mb-5">
+          ユーザーIDを選択してください
+        </p>
+      )}
+      {selectedUserId !== '' && (
+        <p className="text-smtext-white p-2 mb-5 ">
+          現在のユーザーID: <span className="text-yellow-400 font-semibold">{selectedUserId}</span>
+        </p>
+      )}
+
+
+
       <div className="flex gap-6 mb-12">
-        <Link
-          href="/register"
+        <button
+          onClick={() => {
+            if (!selectedUserId) {
+              alert('ユーザーを選択してください');
+              return;
+            }
+            router.push(`/register/${selectedUserId}`);
+          }}
           className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2 px-6 rounded shadow transition"
         >
           ウイスキーを登録する
-        </Link>
-        <Link
-          href="/mypage"
+        </button>
+
+        <button
+          onClick={() => {
+            if (!selectedUserId) {
+              alert('ユーザーを選択してください');
+              return;
+            }
+            router.push(`/mypage/${selectedUserId}`);
+          }}
           className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded shadow transition"
         >
           マイページへ
-        </Link>
+        </button>
       </div>
 
       <section className="w-full max-w-xl bg-gray-800 bg-opacity-80 p-6 rounded shadow mb-16">
@@ -80,9 +145,17 @@ export default function Home() {
           </ul>
         )}
       </section>
+      <div>
+        <Link
+          href="/userRegister"
+          className="bg-sky-400 hover:bg-sky-500 text-white font-semibold py-2 px-6 rounded shadow transition"
+        >
+          ユーザー新規登録
+        </Link>
+      </div>
 
-      <footer className="text-xs text-gray-500">
-        あなたの一番好きなウイスキーは？
+      <footer className="text-xs mt-5 text-gray-500">
+        あなたの一番好きなウイスキーを探しに行きませんか？
       </footer>
     </main>
   );

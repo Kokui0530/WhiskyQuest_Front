@@ -2,21 +2,28 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+
+
+
 
 export default function RegisterWhiskyPage() {
   const [name, setName] = useState('');
   const [taste, setTaste] = useState('');
-  const [styles, setStyles] = useState<string[]>([]);
+  const [drinkingStyle, setDrinkingStyle] = useState<string[]>([]);
   const [price, setPrice] = useState<number | ''>('');
-  const [memo, setMemo] = useState('');
+  const [comment, setComment] = useState('');
   const [rating, setRating] = useState<number>(1); // 初期値を1に設定
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const { id } = useParams();
+  const router = useRouter();
 
   const drinkingOptions = ['ストレート', 'ロック', 'ハイボール', '水割り'];
 
   const handleStyleChange = (style: string) => {
-    setStyles((prev) =>
+    setDrinkingStyle((prev) =>
       prev.includes(style) ? prev.filter((s) => s !== style) : [...prev, style]
     );
   };
@@ -32,14 +39,16 @@ export default function RegisterWhiskyPage() {
 
     const whiskyInfo = {
       whisky: {
+        userId: Number(id),
         name,
         taste,
-        drinkingStyle: styles.join(','),
+        drinkingStyle: drinkingStyle.join(','),
         price: price === '' ? null : price,
-        memo,
       },
       rating: {
+        userId: Number(id),
         rating,
+        comment,
       },
     };
 
@@ -51,21 +60,17 @@ export default function RegisterWhiskyPage() {
       });
 
       if (res.status === 409) {
-        setError('同じウイスキーの登録があります。\nマイページの編集から編集をしてください。');
+        alert('同じウイスキーの登録があります。\nマイページの編集から編集をしてください。');
         return;
       }
 
       if (!res.ok) throw new Error('登録失敗');
 
-      setSuccess('ウイスキーを登録しました！');
-      setName('');
-      setTaste('');
-      setStyles([]);
-      setPrice('');
-      setMemo('');
-      setRating(0);
+      alert('ウイスキーを登録しました！');
+      router.push(`/mypage/${id}`);
     } catch (err) {
-      setError('登録中にエラーが発生しました');
+      console.error('登録失敗:', err);
+      alert('登録中にエラーが発生しました');
     }
   };
 
@@ -102,7 +107,7 @@ export default function RegisterWhiskyPage() {
               <label key={style} className="flex items-center gap-1">
                 <input
                   type="checkbox"
-                  checked={styles.includes(style)}
+                  checked={drinkingStyle.includes(style)}
                   onChange={() => handleStyleChange(style)}
                   className="accent-yellow-500"
                 />
@@ -116,17 +121,23 @@ export default function RegisterWhiskyPage() {
           <label className="block mb-1 font-semibold">値段</label>
           <input
             type="number"
+            step="1"
             value={price}
-            onChange={(e) => setPrice(Number(e.target.value))}
+            onChange={(e) => {
+              const value = e.target.value;
+              setPrice(value === '' ? '' : parseInt(value, 10)); // ← 小数を完全に防ぐ！
+            }}
             className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 appearance-none"
           />
+
+
         </div>
 
         <div>
           <label className="block mb-1 font-semibold">コメント</label>
           <textarea
-            value={memo}
-            onChange={(e) => setMemo(e.target.value)}
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
             className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600"
             rows={3}
           />

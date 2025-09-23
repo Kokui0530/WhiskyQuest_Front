@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+
 
 
 type User = {
@@ -14,8 +15,6 @@ type User = {
 };
 
 export default function EditUserPage() {
-  const router = useRouter();
-
   const [user, setUser] = useState<User>({
     id: '',
     userName: '',
@@ -25,12 +24,22 @@ export default function EditUserPage() {
 
   const [loading, setLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+  const params = useParams();
+  const rawId = params?.id;
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
+  const numericId = Number(id);
+
+
 
   useEffect(() => {
+    if (!id) return;
+
     const fetchUser = async () => {
       try {
-        const res = await fetch('http://localhost:8080/user/3');
+        const res = await fetch(`http://localhost:8080/user/${numericId}`);
         const json = await res.json();
+        console.log('取得したユーザー情報:', json);
         setUser({
           id: json.users.id,
           userName: json.users.userName,
@@ -45,11 +54,14 @@ export default function EditUserPage() {
     };
 
     fetchUser();
-  }, []);
+  }, [id]);
+
+
 
   const handleUpdate = async () => {
+    if (!id || Array.isArray(id)) return;
     try {
-      const res = await fetch('http://localhost:8080/updateUser/3', {
+      const res = await fetch(`http://localhost:8080/updateUser/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(user),
@@ -57,7 +69,7 @@ export default function EditUserPage() {
 
       if (res.ok) {
         alert('ユーザー情報を更新しました！');
-        router.push('/mypage');
+        router.push(`/`);
       } else {
         alert('更新に失敗しました');
       }
@@ -67,18 +79,21 @@ export default function EditUserPage() {
   };
 
   const handleDelete = async () => {
+    if (!id || Array.isArray(id)) return;
     const confirm = window.confirm('本当に退会しますか？');
     if (!confirm) return;
 
     try {
-      await fetch('http://localhost:8080/deleteUser/3', {
+      await fetch(`http://localhost:8080/deleteUser/${id}`, {
         method: 'PUT',
       });
       alert('退会処理が完了しました');
+      router.push('/');
     } catch (error) {
       console.error('退会失敗:', error);
     }
   };
+
 
   if (loading) {
     return <p className="text-center text-gray-400 mt-10">読み込み中...</p>;
