@@ -4,7 +4,6 @@ import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 
-
 type Rating = {
   id: number;
   userId: number;
@@ -24,15 +23,16 @@ type Whisky = {
   price: number | null;
   isDeleted: boolean;
 };
-export default function PageWrapper() {
+
+export default function EditWhiskyPage() {
   return (
     <Suspense fallback={<p className="text-center text-gray-400 mt-10">読み込み中...</p>}>
-      <EditWhiskyPage />
+      <EditWhiskyContent />
     </Suspense>
   );
 }
 
-function EditWhiskyPage() {
+function EditWhiskyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [id, setId] = useState<string | null>(null);
@@ -40,6 +40,7 @@ function EditWhiskyPage() {
   const [rating, setRating] = useState<Rating | null>(null);
   const [loading, setLoading] = useState(true);
   const drinkingOptions = ['ストレート', 'ロック', 'ハイボール', '水割り'];
+
   useEffect(() => {
     const paramId = searchParams.get('id');
     if (paramId) setId(paramId);
@@ -84,6 +85,7 @@ function EditWhiskyPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ whisky, rating }),
       });
+
       if (res.ok) {
         alert('ウイスキー情報を更新しました！');
         router.push(`/mypage/${whisky.userId}`);
@@ -138,6 +140,7 @@ function EditWhiskyPage() {
       </main>
     );
   }
+
   const selectedStyles = whisky.drinkingStyle?.split(',') ?? [];
 
   return (
