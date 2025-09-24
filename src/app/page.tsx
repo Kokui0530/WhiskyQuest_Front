@@ -19,6 +19,8 @@ export default function RegisterWhiskyPage() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const [selectedUserId, setSelectedUserId] = useState<number | ''>('');
+  const [userExists, setUserExists] = useState<boolean | null>(null);
+
 
   useEffect(() => {
     const storedId = localStorage.getItem('selectedUserId');
@@ -38,6 +40,8 @@ export default function RegisterWhiskyPage() {
         setLoading(false);
       }
     };
+
+
 
     fetchRanking();
   }, []);
@@ -68,15 +72,33 @@ export default function RegisterWhiskyPage() {
             min={1}
           />
           <button
-            onClick={() => {
-              if (selectedUserId !== '') {
-                localStorage.setItem('selectedUserId', selectedUserId.toString());
+            onClick={async () => {
+              if (selectedUserId === '') return;
+
+              localStorage.setItem('selectedUserId', selectedUserId.toString());
+
+              try {
+                const res = await fetch(`http://localhost:8080/user/${selectedUserId}`);
+                if (!res.ok) {
+                  setUserExists(false);
+                  return;
+                }
+                const json = await res.json();
+                if (json && json.users) {
+                  setUserExists(true);
+                } else {
+                  setUserExists(false);
+                }
+              } catch (error) {
+                console.error('ユーザー確認失敗:', error);
+                setUserExists(false);
               }
             }}
             className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded"
           >
             ユーザー切り替え
           </button>
+
         </div>
       </div>
 
@@ -90,7 +112,15 @@ export default function RegisterWhiskyPage() {
         <p className="text-smtext-white p-2 mb-5 ">
           現在のユーザーID: <span className="text-yellow-400 font-semibold">{selectedUserId}</span>
         </p>
+
       )}
+      {userExists === false && (
+        <p className="text-sm text-red-400 mb-5">
+          このIDのユーザーは登録されていません
+        </p>
+      )}
+
+
 
 
 

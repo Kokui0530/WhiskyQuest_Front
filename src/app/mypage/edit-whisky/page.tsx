@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { useRouter } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 
 type Rating = {
@@ -25,8 +24,15 @@ type Whisky = {
   price: number | null;
   isDeleted: boolean;
 };
+export default function PageWrapper() {
+  return (
+    <Suspense fallback={<p className="text-center text-gray-400 mt-10">読み込み中...</p>}>
+      <EditWhiskyPage />
+    </Suspense>
+  );
+}
 
-export default function EditWhiskyPage() {
+function EditWhiskyPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [id, setId] = useState<string | null>(null);
@@ -34,7 +40,6 @@ export default function EditWhiskyPage() {
   const [rating, setRating] = useState<Rating | null>(null);
   const [loading, setLoading] = useState(true);
   const drinkingOptions = ['ストレート', 'ロック', 'ハイボール', '水割り'];
-
   useEffect(() => {
     const paramId = searchParams.get('id');
     if (paramId) setId(paramId);
@@ -79,7 +84,6 @@ export default function EditWhiskyPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ whisky, rating }),
       });
-
       if (res.ok) {
         alert('ウイスキー情報を更新しました！');
         router.push(`/mypage/${whisky.userId}`);
@@ -91,7 +95,6 @@ export default function EditWhiskyPage() {
       alert('エラーが発生しました');
     }
   };
-
 
   const handleDelete = async () => {
     if (!whisky || !rating) return;
@@ -135,7 +138,6 @@ export default function EditWhiskyPage() {
       </main>
     );
   }
-
   const selectedStyles = whisky.drinkingStyle?.split(',') ?? [];
 
   return (

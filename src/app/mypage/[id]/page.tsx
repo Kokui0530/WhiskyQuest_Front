@@ -51,6 +51,7 @@ export default function MyPage() {
 
       const res = await fetch(`http://localhost:8080/user/${id}`);
       const json: UserData = await res.json();
+      console.log(json);
 
       const enrichedWhiskyList: Whisky[] = json.whiskyList.map((whisky) => {
         const rating = json.ratingList.find((r) => r.whiskyId === whisky.id);
