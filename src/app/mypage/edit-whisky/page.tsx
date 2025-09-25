@@ -1,10 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { useRouter } from 'next/navigation';
-
+import { useSearchParams, useRouter } from 'next/navigation';
 
 type Rating = {
   id: number;
@@ -27,6 +25,14 @@ type Whisky = {
 };
 
 export default function EditWhiskyPage() {
+  return (
+    <Suspense fallback={<p className="text-center text-gray-400 mt-10">読み込み中...</p>}>
+      <EditWhiskyContent />
+    </Suspense>
+  );
+}
+
+function EditWhiskyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [id, setId] = useState<string | null>(null);
@@ -45,7 +51,7 @@ export default function EditWhiskyPage() {
 
     const fetchWhisky = async () => {
       try {
-        const res = await fetch(`http://localhost:8080/whisky/${id}`);
+        const res = await fetch(`http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/whisky/${id}`);
         if (!res.ok) throw new Error('API取得失敗');
 
         const json = await res.json();
@@ -74,7 +80,7 @@ export default function EditWhiskyPage() {
     if (!whisky || !rating) return;
 
     try {
-      const res = await fetch(`http://localhost:8080/updateWhiskyInfo/${whisky.id}/${rating.id}`, {
+      const res = await fetch(`http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/updateWhiskyInfo/${whisky.id}/${rating.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ whisky, rating }),
@@ -92,7 +98,6 @@ export default function EditWhiskyPage() {
     }
   };
 
-
   const handleDelete = async () => {
     if (!whisky || !rating) return;
 
@@ -100,11 +105,11 @@ export default function EditWhiskyPage() {
     if (!confirmDelete) return;
 
     try {
-      const resWhisky = await fetch(`http://localhost:8080/deleteWhisky/${whisky.userId}/${whisky.id}`, {
+      const resWhisky = await fetch(`http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/deleteWhisky/${whisky.userId}/${whisky.id}`, {
         method: 'PUT',
       });
 
-      const resRating = await fetch(`http://localhost:8080/deleteRating/${rating.userId}/${rating.id}`, {
+      const resRating = await fetch(`http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/deleteRating/${rating.userId}/${rating.id}`, {
         method: 'PUT',
       });
 
