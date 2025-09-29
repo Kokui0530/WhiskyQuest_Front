@@ -26,7 +26,7 @@ export default function RegisterWhiskyPage() {
   useEffect(() => {
     const fetchRanking = async () => {
       try {
-        const res = await fetch('http://localhost:8080/whiskyRanking');
+        const res = await fetch('http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/whiskyRanking');
         const json = await res.json();
         setRankingList(json);
       } catch (error) {
@@ -74,7 +74,7 @@ export default function RegisterWhiskyPage() {
               localStorage.setItem('selectedUserId', selectedUserId.toString());
 
               try {
-                const res = await fetch(`http://localhost:8080/user/${selectedUserId}`);
+                const res = await fetch(`http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/user/${selectedUserId}`);
                 if (!res.ok) {
                   setUserExists(false);
                   return;
