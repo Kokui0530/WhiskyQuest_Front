@@ -53,7 +53,7 @@ export default function RegisterWhiskyPage() {
     };
 
     try {
-      const res = await fetch('http://localhost:8080/whisky', {
+      const res = await fetch('http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/whisky', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(whiskyInfo),

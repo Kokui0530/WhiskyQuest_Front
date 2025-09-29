@@ -22,7 +22,7 @@ export default function RegisterUserPage() {
     const userInfo = { userName, mail, password };
 
     try {
-      const res = await fetch('http://localhost:8080/registerUser', {
+      const res = await fetch('http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/registerUser', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userInfo),
