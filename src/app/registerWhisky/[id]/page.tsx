@@ -53,7 +53,7 @@ export default function RegisterWhiskyPage() {
     };
 
     try {
-      const res = await fetch('http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/whisky', {
+      const res = await fetch('http://localhost:8080/whisky', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(whiskyInfo),
@@ -122,10 +122,11 @@ export default function RegisterWhiskyPage() {
           <input
             type="number"
             step="1"
+            min="0"
             value={price}
             onChange={(e) => {
               const value = e.target.value;
-              setPrice(value === '' ? '' : parseInt(value, 10)); // ← 小数を完全に防ぐ！
+              setPrice(value === '' ? '' : Number(value));
             }}
             className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 appearance-none"
           />

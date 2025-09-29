@@ -37,7 +37,7 @@ export default function EditUserPage() {
 
     const fetchUser = async () => {
       try {
-        const res = await fetch(`http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/user/${numericId}`);
+        const res = await fetch(`http://localhost:8080/user/${numericId}`);
         const json = await res.json();
         console.log('取得したユーザー情報:', json);
         setUser({
@@ -61,7 +61,7 @@ export default function EditUserPage() {
   const handleUpdate = async () => {
     if (!id || Array.isArray(id)) return;
     try {
-      const res = await fetch(`http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/updateUser/${id}`, {
+      const res = await fetch(`http://localhost:8080/updateUser/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(user),
@@ -69,7 +69,7 @@ export default function EditUserPage() {
 
       if (res.ok) {
         alert('ユーザー情報を更新しました！');
-        router.push(`/`);
+        router.push(`/mypage/${user.id}`);
       } else {
         alert('更新に失敗しました');
       }
@@ -84,7 +84,7 @@ export default function EditUserPage() {
     if (!confirm) return;
 
     try {
-      await fetch(`http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/deleteUser/${id}`, {
+      await fetch(`http://localhost:8080/deleteUser/${id}`, {
         method: 'PUT',
       });
       alert('退会処理が完了しました');

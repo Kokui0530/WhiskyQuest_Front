@@ -22,16 +22,11 @@ export default function RegisterWhiskyPage() {
   const [userExists, setUserExists] = useState<boolean | null>(null);
 
 
-  useEffect(() => {
-    const storedId = localStorage.getItem('selectedUserId');
-    if (storedId) {
-      setSelectedUserId(Number(storedId));
-    }
-  }, []);
+
   useEffect(() => {
     const fetchRanking = async () => {
       try {
-        const res = await fetch('http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/whiskyRanking');
+        const res = await fetch('http://localhost:8080/whiskyRanking');
         const json = await res.json();
         setRankingList(json);
       } catch (error) {
@@ -55,7 +50,7 @@ export default function RegisterWhiskyPage() {
     <main className="min-h-screen bg-gray-900 text-white px-4 py-8 flex flex-col items-center">
       <h1 className="text-5xl font-bold mb-6 text-yellow-400">WhiskyQuest 🥃</h1>
       <p className="text-lg text-gray-300 text-center max-w-xl mb-10">
-        あなたのウイスキー体験を記録・共有しましょう。
+        あなたのウイスキー体験を記録しましょう。
       </p>
 
       <div className="flex items-center gap-4 mb-2">
@@ -64,6 +59,7 @@ export default function RegisterWhiskyPage() {
           <input
             type="number"
             value={selectedUserId}
+            autoComplete="off"
             onChange={(e) => {
               const value = e.target.value;
               setSelectedUserId(value === '' ? '' : Number(value));
@@ -78,7 +74,7 @@ export default function RegisterWhiskyPage() {
               localStorage.setItem('selectedUserId', selectedUserId.toString());
 
               try {
-                const res = await fetch(`http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/user/${selectedUserId}`);
+                const res = await fetch(`http://localhost:8080/user/${selectedUserId}`);
                 if (!res.ok) {
                   setUserExists(false);
                   return;
@@ -131,7 +127,7 @@ export default function RegisterWhiskyPage() {
               alert('ユーザーを選択してください');
               return;
             }
-            router.push(`/register/${selectedUserId}`);
+            router.push(`/registerWhisky/${selectedUserId}`);
           }}
           className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2 px-6 rounded shadow transition"
         >
@@ -163,7 +159,7 @@ export default function RegisterWhiskyPage() {
           <ul className="space-y-4">
             {rankingList.map((item) => (
               <li key={item.whiskyId} className="bg-gray-700 p-4 rounded shadow">
-                <Link href={`/whisky/${item.whiskyId}`} className="text-lg font-semibold text-yellow-300 hover:underline">
+                <Link href={`/rankingDetail/${item.whiskyId}`} className="text-lg font-semibold text-yellow-300 hover:underline">
                   {item.name}
                 </Link>
                 <p className="text-yellow-400">
@@ -177,7 +173,7 @@ export default function RegisterWhiskyPage() {
       </section>
       <div>
         <Link
-          href="/userRegister"
+          href="/registerUser"
           className="bg-sky-400 hover:bg-sky-500 text-white font-semibold py-2 px-6 rounded shadow transition"
         >
           ユーザー新規登録

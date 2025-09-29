@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-
+import { useRouter } from 'next/navigation';
 
 export default function RegisterUserPage() {
+  const router = useRouter();
   const [userName, setUserName] = useState('');
   const [mail, setMail] = useState('');
   const [password, setPassword] = useState('');
@@ -13,21 +14,15 @@ export default function RegisterUserPage() {
 
   const handleSubmit = async () => {
     setError('');
-    setSuccess('');
 
     if (!userName.trim() || !mail.trim() || !password.trim()) {
       setError('すべての項目は必須です');
       return;
     }
-
-    const userInfo = {
-      userName,
-      mail,
-      password,
-    };
+    const userInfo = { userName, mail, password };
 
     try {
-      const res = await fetch('http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/registerUser', {
+      const res = await fetch('http://localhost:8080/registerUser', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userInfo),
@@ -35,15 +30,13 @@ export default function RegisterUserPage() {
 
       if (!res.ok) throw new Error('登録失敗');
 
-      setSuccess('ユーザー登録が完了しました！');
-      setUserName('');
-      setMail('');
-      setPassword('');
+      const data = await res.json();
+      alert(`ユーザー登録が完了しました！\nあなたのユーザーIDは ${data.id} です`);
+      router.push('/'); // ← TOPに戻る
     } catch (err) {
       setError('登録中にエラーが発生しました');
     }
   };
-
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white flex items-center justify-center px-4">
       <form className="bg-gray-800 bg-opacity-80 p-8 rounded shadow-md w-full max-w-md space-y-6">

@@ -51,7 +51,7 @@ function EditWhiskyContent() {
 
     const fetchWhisky = async () => {
       try {
-        const res = await fetch(`http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/whisky/${id}`);
+        const res = await fetch(`http://localhost:8080/whisky/${id}`);
         if (!res.ok) throw new Error('API取得失敗');
 
         const json = await res.json();
@@ -80,7 +80,7 @@ function EditWhiskyContent() {
     if (!whisky || !rating) return;
 
     try {
-      const res = await fetch(`http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/updateWhiskyInfo/${whisky.id}/${rating.id}`, {
+      const res = await fetch(`http://localhost:8080/updateWhiskyInfo/${whisky.id}/${rating.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ whisky, rating }),
@@ -105,11 +105,11 @@ function EditWhiskyContent() {
     if (!confirmDelete) return;
 
     try {
-      const resWhisky = await fetch(`http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/deleteWhisky/${whisky.userId}/${whisky.id}`, {
+      const resWhisky = await fetch(`http://localhost:8080/deleteWhisky/${whisky.userId}/${whisky.id}`, {
         method: 'PUT',
       });
 
-      const resRating = await fetch(`http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/deleteRating/${rating.userId}/${rating.id}`, {
+      const resRating = await fetch(`http://localhost:8080/deleteRating/${rating.userId}/${rating.id}`, {
         method: 'PUT',
       });
 
@@ -190,7 +190,8 @@ function EditWhiskyContent() {
           <label className="block mb-1 font-semibold">価格</label>
           <input
             type="number"
-            step="1" // ← 小数を防ぐ
+             step="1"
+            min="0" // ← 小数を防ぐ
             value={whisky.price ?? ''}
             onChange={(e) =>
               setWhisky({

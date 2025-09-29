@@ -15,7 +15,7 @@ export default function WhiskyDetailPage() {
     const [reviews, setReviews] = useState<Review[]>([]);
 
     useEffect(() => {
-        fetch(`http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/whisky/${whiskyId}`)
+        fetch(`http://localhost:8080/whisky/${whiskyId}`)
             .then((res) => res.json())
             .then((data) => {
                 console.log('APIレスポンス:', data);

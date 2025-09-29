@@ -25,8 +25,8 @@ type Whisky = {
   drinkingStyle: string;
   price: number;
   isDeleted: boolean;
-  rating?: Rating;
 };
+type WhiskyWithRating = Whisky & { rating: Rating | null };
 
 type UserData = {
   users: {
@@ -36,27 +36,32 @@ type UserData = {
     password: string;
     isDeleted: boolean;
   };
-  whiskyList: Whisky[];
+  whiskyList: WhiskyWithRating[];
   ratingList: Rating[];
 };
+
 
 export default function MyPage() {
   const [data, setData] = useState<UserData | null>(null);
   const { id } = useParams();
 
-
   useEffect(() => {
     const fetchData = async () => {
-      if (!id) return; // ← 念のためチェック
+      if (!id) return;
 
-      const res = await fetch(`http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/user/${id}`);
+      const res = await fetch(`http://localhost:8080/user/${id}`);
       const json: UserData = await res.json();
       console.log(json);
 
-      const enrichedWhiskyList: Whisky[] = json.whiskyList.map((whisky) => {
+      const enrichedWhiskyList: WhiskyWithRating[] = json.whiskyList.map((whisky) => {
         const rating = json.ratingList.find((r) => r.whiskyId === whisky.id);
-        return { ...whisky, rating };
-      });
+        return { ...whisky, rating: rating ?? null };
+
+      })
+
+        .filter((w): w is WhiskyWithRating => w !== null);
+      console.log(json.whiskyList.map(w => w.name));
+      console.log(json.ratingList.map(r => r.whiskyId));
 
       setData({
         users: json.users,
@@ -66,7 +71,8 @@ export default function MyPage() {
     };
 
     fetchData();
-  }, [id]); // ← idが変わったら再取得！
+  }, [id]);
+
 
 
   if (!data) {
@@ -86,6 +92,10 @@ export default function MyPage() {
         <h1 className="text-3xl font-bold text-yellow-400 text-center mb-2">
           {data.users.userName}さんのマイページ
         </h1>
+        <p className="text-center text-sm text-gray-400 mb-6">
+          ユーザーID：{data.users.id}
+        </p>
+
 
 
         <div className="flex justify-end mb-8">
