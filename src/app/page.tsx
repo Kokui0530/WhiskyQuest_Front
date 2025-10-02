@@ -4,7 +4,14 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
+import Head from 'next/head';
 
+<Head>
+  <title>WhiskyQuest - ウイスキー管理</title>
+  <meta property="og:title" content="WhiskyQuest" />
+  <meta property="og:description" content="ウイスキーの銘柄やテイスティングノートを管理できるアプリ" />
+  <meta property="og:url" content="http://whiskyquestfrontalb-2012089750.ap-northeast-1.elb.amazonaws.com/" />
+</Head>
 
 type WhiskyRanking = {
   whiskyId: number;
