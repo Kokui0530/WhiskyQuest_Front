@@ -129,7 +129,7 @@ export default function MyPage() {
 
               {/* 編集ボタン */}
               <Link
-                href={`/mypage/edit-whisky?id=${whisky.id}`}
+                href={`/mypage/edit-whisky/${whisky.id}`}
                 className="absolute bottom-4 right-4 bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-1 px-4 rounded"
               >
                 編集
@@ -139,13 +139,26 @@ export default function MyPage() {
         </ul>
 
         {/* ✅ フッター */}
-        <div className="flex justify-end mt-10">
+        <div className="flex flex-col sm:flex-row justify-center gap-4 mt-10">
+          <Link href="/ranking">
+            <button className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-6 rounded shadow">
+              ランキング一覧へ
+            </button>
+          </Link>
+
+          <Link href={`/registerWhisky/${data.users.id}`}>
+            <button className="bg-yellow-500 hover:bg-green-600 text-black font-bold py-2 px-6 rounded shadow">
+              ウイスキーを登録する
+            </button>
+          </Link>
+
           <Link href="/">
             <button className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded shadow">
-              TOPへ戻る
+              ログアウト
             </button>
           </Link>
         </div>
+
       </div>
     </main>
   );

@@ -2,11 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { useRouter } from 'next/navigation';
-
-
-
+import { useParams, useRouter } from 'next/navigation';
 
 export default function RegisterWhiskyPage() {
   const [name, setName] = useState('');
@@ -14,9 +10,8 @@ export default function RegisterWhiskyPage() {
   const [drinkingStyle, setDrinkingStyle] = useState<string[]>([]);
   const [price, setPrice] = useState<number | ''>('');
   const [comment, setComment] = useState('');
-  const [rating, setRating] = useState<number>(1); // 初期値を1に設定
+  const [rating, setRating] = useState<number>(1);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const { id } = useParams();
   const router = useRouter();
 
@@ -30,7 +25,6 @@ export default function RegisterWhiskyPage() {
 
   const handleSubmit = async () => {
     setError('');
-    setSuccess('');
 
     if (!name.trim()) {
       setError('ウイスキー名は必須です');
@@ -130,8 +124,6 @@ export default function RegisterWhiskyPage() {
             }}
             className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 appearance-none"
           />
-
-
         </div>
 
         <div>
@@ -152,17 +144,16 @@ export default function RegisterWhiskyPage() {
                 key={star}
                 type="button"
                 onClick={() => setRating(star)}
-                className={`text-2xl ${rating >= star ? 'text-yellow-400' : 'text-gray-500'
-                  } hover:scale-110 transition-transform`}
+                className={`text-2xl ${rating >= star ? 'text-yellow-400' : 'text-gray-500'} hover:scale-110 transition-transform`}
               >
                 ★
               </button>
-
             ))}
           </div>
         </div>
+
         {error && <p className="text-red-500 text-center whitespace-pre-line">{error}</p>}
-        {success && <p className="text-green-400 text-center">{success}</p>}
+
         <button
           type="button"
           onClick={handleSubmit}
@@ -170,10 +161,17 @@ export default function RegisterWhiskyPage() {
         >
           登録する
         </button>
-        <div className="flex justify-end mt-6">
-          <Link href="/">
-            <button className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded">
-              TOPへ戻る
+
+        {/* ✅ ナビゲーション追加 */}
+        <div className="flex justify-between mt-6">
+          <Link href={`/mypage/${id}`}>
+            <button className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
+              マイページへ
+            </button>
+          </Link>
+          <Link href="/ranking">
+            <button className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
+              ランキング一覧へ
             </button>
           </Link>
         </div>
