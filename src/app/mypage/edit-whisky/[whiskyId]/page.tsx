@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 type Rating = {
   id: number;
@@ -34,24 +34,16 @@ export default function EditWhiskyPage() {
 
 function EditWhiskyContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [id, setId] = useState<string | null>(null);
+  const { whiskyId } = useParams();
   const [whisky, setWhisky] = useState<Whisky | null>(null);
   const [rating, setRating] = useState<Rating | null>(null);
   const [loading, setLoading] = useState(true);
   const drinkingOptions = ['ストレート', 'ロック', 'ハイボール', '水割り'];
 
   useEffect(() => {
-    const paramId = searchParams.get('id');
-    if (paramId) setId(paramId);
-  }, [searchParams]);
-
-  useEffect(() => {
-    if (!id) return;
-
     const fetchWhisky = async () => {
       try {
-        const res = await fetch(`http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/whisky/${id}`);
+        const res = await fetch(`http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/whisky/${whiskyId}`);
         if (!res.ok) throw new Error('API取得失敗');
 
         const json = await res.json();
@@ -64,8 +56,10 @@ function EditWhiskyContent() {
       }
     };
 
-    fetchWhisky();
-  }, [id]);
+    if (whiskyId) {
+      fetchWhisky();
+    }
+  }, [whiskyId]);
 
   const handleStyleChange = (style: string) => {
     if (!whisky) return;
@@ -133,7 +127,7 @@ function EditWhiskyContent() {
     return (
       <main className="min-h-screen bg-black text-white px-4 py-8">
         <h1 className="text-center text-red-500 text-xl">データ取得に失敗しました</h1>
-        <p className="text-center text-gray-400 mt-4">ウイスキーID: {id ?? '未取得'}</p>
+        <p className="text-center text-gray-400 mt-4">ウイスキーID: {whiskyId ?? '未取得'}</p>
         <div className="text-center mt-6">
           <Link href="/" className="text-yellow-400 hover:underline">TOPに戻る</Link>
         </div>
@@ -190,7 +184,7 @@ function EditWhiskyContent() {
           <label className="block mb-1 font-semibold">価格</label>
           <input
             type="number"
-             step="1"
+            step="1"
             min="0" // ← 小数を防ぐ
             value={whisky.price ?? ''}
             onChange={(e) =>
