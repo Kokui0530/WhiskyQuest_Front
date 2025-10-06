@@ -45,6 +45,33 @@ export default function TopPage() {
       setError('ログイン中にエラーが発生しました');
     }
   };
+  // 🔽 TopPage コンポーネント内に追加（handleLoginの下あたり）
+
+  const handleGuestLogin = async () => {
+    setError('');
+    const guestId = 4;
+
+    try {
+      const res = await fetch(`http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/user/${guestId}`);
+      if (!res.ok) {
+        setError('ゲストユーザーが見つかりません');
+        return;
+      }
+
+      const json = await res.json();
+      if (!json || !json.users || json.users.isDeleted) {
+        setError('ゲストユーザーは無効です');
+        return;
+      }
+
+      localStorage.setItem('selectedUserId', guestId.toString());
+      router.push(`/registerWhisky/${guestId}`);
+    } catch (err) {
+      console.error('ゲストログイン失敗:', err);
+      setError('ゲストログイン中にエラーが発生しました');
+    }
+  };
+
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white flex flex-col items-center justify-center px-4 py-10">
@@ -79,6 +106,15 @@ export default function TopPage() {
           >
             ウイスキー登録へ進む
           </button>
+
+          {/* ✅ ゲストログイン */}
+          <button
+            onClick={handleGuestLogin}
+            className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-6 rounded shadow"
+          >
+            ゲストログインして試してみる
+          </button>
+
         </div>
       </div>
 
