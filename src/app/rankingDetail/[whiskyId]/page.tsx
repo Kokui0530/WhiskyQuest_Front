@@ -39,11 +39,13 @@ export default function WhiskyDetailPage() {
                     ))}
                 </ul>
                 <div className="flex justify-end mt-6">
-                    <Link href="/">
+
+                    <Link href="/ranking">
                         <button className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded">
-                            TOPへ戻る
+                            ランキングへ戻る
                         </button>
                     </Link>
+
                 </div>
             </div>
         </main>

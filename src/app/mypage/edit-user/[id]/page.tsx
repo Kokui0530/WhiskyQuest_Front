@@ -37,7 +37,7 @@ export default function EditUserPage() {
 
     const fetchUser = async () => {
       try {
-        const res = await fetch(`http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/user/${numericId}`);
+ const res = await fetch(`http://WhiskyQuestALB-2003468577.ap-northeast-1.elb.amazonaws.com/user/${numericId}`);
         const json = await res.json();
         console.log('取得したユーザー情報:', json);
         setUser({
@@ -167,7 +167,11 @@ export default function EditUserPage() {
         </button>
 
         <div className="text-center mt-4">
-          <Link href="/" className="text-yellow-400 hover:underline">TOPに戻る</Link>
+          <Link href={`/mypage/${id}`}>
+            <button className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
+              マイページへ
+            </button>
+          </Link>
         </div>
       </form>
     </main>

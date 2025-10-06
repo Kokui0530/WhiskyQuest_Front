@@ -108,9 +108,11 @@ function EditWhiskyContent() {
       });
 
       if (resWhisky.ok && resRating.ok) {
-        alert('削除が完了しました');
-        router.push('/');
-      } else {
+        const userId = whisky.userId;
+        router.push(`/mypage/${userId}`)
+        return;
+      }
+      else {
         alert('削除に失敗しました');
       }
     } catch (error) {
@@ -242,9 +244,9 @@ function EditWhiskyContent() {
         </button>
 
         <div className="flex justify-end mt-10">
-          <Link href="/">
-            <button className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded shadow">
-              TOPへ戻る
+          <Link href={`/mypage/${whisky.userId}`}>
+            <button className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
+              マイページへ
             </button>
           </Link>
         </div>
