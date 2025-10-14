@@ -4,12 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-// ✅ ページのタイトルと説明を設定（App Router用）
-export const metadata = {
-  title: 'WhiskyQuest',
-  description: 'お気に入りのウイスキーを記録・管理できるアプリ',
-};
-
 export default function TopPage() {
   const router = useRouter();
   const [userId, setUserId] = useState<number | ''>('');
@@ -42,7 +36,6 @@ export default function TopPage() {
       setError('ログイン中にエラーが発生しました');
     }
   };
-
   const handleGuestLogin = async () => {
     setError('');
     const guestId = 4;
@@ -68,18 +61,21 @@ export default function TopPage() {
     }
   };
 
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white flex flex-col items-center justify-center px-4 py-10">
       <h1 className="text-4xl font-bold text-yellow-400 mb-6">WhiskyQuest 🥃</h1>
       <p className="text-lg text-gray-300 mb-10 text-center">お気に入りの1本を探しに</p>
 
       <div className="flex flex-col gap-6 w-full max-w-md">
+        {/* ✅ 新規登録 */}
         <Link href="/registerUser">
           <button className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-6 rounded shadow">
             ユーザー新規登録
           </button>
         </Link>
 
+        {/* ✅ IDログイン */}
         <div className="bg-gray-800 p-6 rounded shadow space-y-4">
           <label className="block font-semibold">ユーザーIDでログイン</label>
           <input
@@ -99,8 +95,9 @@ export default function TopPage() {
           >
             ウイスキー登録へ進む
           </button>
-        </div>
 
+        </div>
+        {/* ✅ ゲストログイン */}
         <button
           onClick={handleGuestLogin}
           className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-6 rounded shadow"
@@ -110,7 +107,7 @@ export default function TopPage() {
       </div>
 
       <footer className="text-xs mt-10 text-gray-500">
-        あなたのウイスキー体験を記録。
+        あなたのウイスキー体験を記録しよう。
       </footer>
     </main>
   );
